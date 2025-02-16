@@ -15,6 +15,38 @@ const Home = () => {
   const [detailLevel, setDetailLevel] = useState<"high" | "detailed">("high"); // Default to high level
   const [includeQuiz, setIncludeQuiz] = useState(false); // Default to no quiz
 
+
+  // Arxiv integration
+
+  const [topic, setTopic] = useState('');
+  const [results, setResults] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSearch = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/arxiv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic, maxResults: 10 }),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setResults(data);
+      } else {
+        console.error('Failed to fetch data:', data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return; // Don't send empty messages
@@ -191,6 +223,29 @@ const Home = () => {
             </div>
           </section>
         </main>
+
+
+
+        {/*..? test*/}
+        <div>
+          <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="Enter topic"
+          />
+          <button onClick={handleSearch} disabled={loading}>
+            {loading ? 'Searching...' : 'Search'}
+          </button>
+          <div>
+            {results.map((result, index) => (
+                <div key={index}>
+                  <h3>{result.title}</h3>
+                  <p>{result.summary}</p>
+                </div>
+            ))}
+          </div>
+        </div>
 
         <Footer /> {/* Use the Footer component */}
       </div>
