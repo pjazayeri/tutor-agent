@@ -3,7 +3,6 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-// Define a type for chat messages
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
@@ -12,6 +11,9 @@ type ChatMessage = {
 const Home = () => {
   const [message, setMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [lessonLength, setLessonLength] = useState(10); // Default to 10 minutes
+  const [detailLevel, setDetailLevel] = useState<"high" | "detailed">("high"); // Default to high level
+  const [includeQuiz, setIncludeQuiz] = useState(false); // Default to no quiz
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ const Home = () => {
     setChatHistory(updatedChatHistory);
     setMessage(""); // Clear the input field
 
-    // Send the message to the API
+    // Send the message and configurations to the API
     const res = await fetch("/api/chat", {
       method: "POST",
       headers: {
@@ -33,12 +35,18 @@ const Home = () => {
       },
       body: JSON.stringify({
         messages: updatedChatHistory,
+        lessonLength, // Include lesson length
+        detailLevel, // Include detail level
+        includeQuiz, // Include quiz preference
       }),
     });
 
     const data = await res.json();
     // Add the assistant's response to the chat history
-    setChatHistory([...updatedChatHistory, { role: "assistant", content: data.content }]);
+    setChatHistory([
+      ...updatedChatHistory,
+      { role: "assistant", content: data.content },
+    ]);
   };
 
   // Reset the chat history
@@ -106,6 +114,63 @@ const Home = () => {
                       placeholder="Enter your message"
                       className="px-3 py-2 bg-gray-700 bg-opacity-50 text-white rounded"
                   />
+
+                  {/* Lesson Length Slider */}
+                  <div className="flex flex-col space-y-2">
+                    <label className="text-gray-100">
+                      Lesson Length: {lessonLength} minutes
+                    </label>
+                    <input
+                        type="range"
+                        min="1"
+                        max="20"
+                        value={lessonLength}
+                        onChange={(e) => setLessonLength(Number(e.target.value))}
+                        className="w-full"
+                    />
+                  </div>
+
+                  {/* Detail Level Radio Buttons */}
+                  <div className="flex flex-col space-y-2">
+                    <label className="text-gray-100">Detail Level:</label>
+                    <div className="flex space-x-4">
+                      <label className="flex items-center space-x-2">
+                        <input
+                            type="radio"
+                            value="high"
+                            checked={detailLevel === "high"}
+                            onChange={() => setDetailLevel("high")}
+                            className="form-radio text-blue-500"
+                        />
+                        <span className="text-gray-100">High Level</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                            type="radio"
+                            value="detailed"
+                            checked={detailLevel === "detailed"}
+                            onChange={() => setDetailLevel("detailed")}
+                            className="form-radio text-blue-500"
+                        />
+                        <span className="text-gray-100">Detailed</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Include Quiz Checkbox */}
+                  <div className="flex items-center space-x-2">
+                    <input
+                        type="checkbox"
+                        checked={includeQuiz}
+                        onChange={(e) => setIncludeQuiz(e.target.checked)}
+                        className="form-checkbox text-blue-500"
+                    />
+                    <label className="text-gray-100">
+                      Include Quiz at the End
+                    </label>
+                  </div>
+
+                  {/* Buttons */}
                   <div className="flex space-x-4">
                     <button
                         type="submit"
