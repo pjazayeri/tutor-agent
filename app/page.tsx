@@ -22,8 +22,11 @@ const Home = () => {
   const [includeQuiz, setIncludeQuiz] = useState(false); // Default to no quiz
   const [loading, setLoading] = useState(false);
   const [arxivData, setArxivData] = useState([]);
+  const [pdfLinks, setPdfLinks] = useState([]);
+  const [chunks, setChunks] = useState("");
 
   const handleTopicSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     if (!topic.trim()) return;
 
@@ -80,8 +83,49 @@ const Home = () => {
     }
   };
 
+  // Use useEffect to trigger the arXiv request after keywords are updated
   useEffect(() => {
-    if (arxivData.length > 0) {
+    if (keywords.length > 0) {
+      const fetchArxivData = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch('/api/arxiv', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ topic: keywords.join(' '), maxResults: 10 }), // Use keywords here
+          });
+          const data = await response.json();
+          if (response.ok) {
+            console.log('ArXiv API Response:', data); // Log the response
+            setArxivData(data);
+
+            // Extract pdf links
+            // @ts-ignore
+            setPdfLinks(extractPdfLinks(data));
+
+
+          } else {
+            console.error('Failed to fetch data:', data.error);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchArxivData();
+    }
+  }, [keywords]); // Trigger this effect when keywords change
+
+
+  useEffect(() => {
+    if (pdfLinks.length > 0) {
+      console.log("Found arxivData, send pdf links to get articles...");
+      console.log("pdf links:", pdfLinks);
+      console.log("keywords:", keywords);
       const populateVector = async () => {
         setLoading(true);
         try {
@@ -90,12 +134,12 @@ const Home = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ messages: [topic], maxResults: 10 }), // Use keywords here
+            body: JSON.stringify({ pdfLinks, keywords, maxResults: 10 }), // Use keywords here
           });
           const data = await response.json();
           if (response.ok) {
-            console.log("ArXiv API Response:", data); // Log the response
-            // set(data);
+            console.log('Chunk response:', data); // Log the response
+            setChunks(data.content);
           } else {
             console.error("Failed to fetch data:", data.error);
           }
@@ -108,7 +152,7 @@ const Home = () => {
 
       populateVector(); // Call the arXiv request function
     }
-  }, [arxivData]); // Trigger this effect when keywords change
+  }, [pdfLinks]); // Trigger this effect when keywords change
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -356,5 +400,17 @@ const Home = () => {
     </div>
   );
 };
+
+
+// @ts-ignore
+function extractPdfLinks(data) {
+  return data.map((item: { [x: string]: string; }) => {
+    if (item['id'] != void 0) {
+      return item['id'].replace("abs", "pdf")
+    } else {
+      return ""
+    }
+  }).filter((item: string) => item !== "");
+}
 
 export default Home;

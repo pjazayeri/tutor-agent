@@ -1,3 +1,5 @@
 node_modules
 .idea
 .next
+pdf/*
+.DS_Store

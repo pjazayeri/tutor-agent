@@ -32,7 +32,7 @@ export async function initializeVectorStore(pdfDirectory: string) {
 
         // Split documents into chunks
         const textSplitter = new RecursiveCharacterTextSplitter({
-            chunkSize: 1000,
+            chunkSize: 500,
             chunkOverlap: 200,
         });
         const splitDocs = await textSplitter.splitDocuments(documents);
@@ -50,7 +50,7 @@ export async function initializeVectorStore(pdfDirectory: string) {
     }
 }
 
-export async function queryVectorStore(query: string, k: number = 50) {
+export async function queryVectorStore(query: string | undefined, k: number = 20) {
     if (!vectorStore) {
         throw new Error("Vector store not initialized");
     }
