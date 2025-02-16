@@ -1,11 +1,14 @@
 "use client";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LessonPlan from "./components/LessonPlan";
+import { parsePlan } from "./utils/planParser";
 
 type ChatMessage = {
   role: "user" | "assistant";
   content: string;
+  modules?: { modulename: string; description: string[] }[];
 };
 
 const Home = () => {
@@ -20,148 +23,84 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [arxivData, setArxivData] = useState([]);
 
-  //
-  // const handleTopicSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!topic.trim()) return;
-  //
-  //   try {
-  //     const res = await fetch("/api/keywords", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ topic }),
-  //     });
-  //
-  //     const data = await res.json();
-  //     if (data.keywords) {
-  //       setKeywords(data.keywords);
-  //       setStep("chat");
-  //       // Initialize chat with the topic
-  //       setChatHistory([
-  //         {
-  //           role: "assistant",
-  //           content: `${data.keywords.join(", ")}`,
-  //         },
-  //       ]);
-  //
-  //       // Use keywords to send requests arxiv
-  //       try {
-  //         const response = await fetch('/api/arxiv', {
-  //           method: 'POST',
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //           },
-  //           body: JSON.stringify({ topic: keywords, maxResults: 10 }),
-  //         });
-  //         const data = await response.json();
-  //         if (response.ok) {
-  //           // setResults(data);
-  //           console.log(data);
-  //         } else {
-  //           console.error('Failed to fetch data:', data.error);
-  //         }
-  //       } catch (error) {
-  //         console.error('Error:', error);
-  //       } finally {
-  //         // setLoading(false);
-  //       }
-  //
-  //
-  //     }
-  //   } catch (error) {
-  //     console.error("Failed to generate keywords:", error);
-  //   }
-  // };
-
-
-  const handleTopicSubmit = async (e) => {
+  const handleTopicSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic.trim()) return;
 
+    setLoading(true);
     try {
-      const res = await fetch('/api/keywords', {
-        method: 'POST',
+      const res = await fetch("/api/keywords", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ topic }),
       });
 
       const data = await res.json();
       if (data.keywords) {
-        setKeywords(data.keywords); // Update keywords state
-        setStep('chat');
+        setKeywords(data.keywords);
+        setStep("chat");
 
-        // Initialize chat with the topic
-        setChatHistory([
-          {
-            role: 'assistant',
-            content: `${data.keywords.join(', ')}`,
+        // Don't show keywords in chat, wait for RAG response
+        const response = await fetch("/api/rag", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        ]);
+          body: JSON.stringify({ messages: [topic], maxResults: 10 }),
+        });
+
+        const ragData = await response.json();
+
+        if (response.ok) {
+          try {
+            const modules = parsePlan(ragData.content);
+            setChatHistory([
+              {
+                role: "assistant",
+                content: ragData.content,
+                modules: modules,
+              },
+            ]);
+          } catch (error) {
+            setChatHistory([
+              {
+                role: "assistant",
+                content: ragData.content,
+              },
+            ]);
+          }
+        }
       }
     } catch (error) {
-      console.error('Failed to generate keywords:', error);
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
     }
   };
-
-  // Use useEffect to trigger the arXiv request after keywords are updated
-  useEffect(() => {
-    if (keywords.length > 0) {
-      const fetchArxivData = async () => {
-        setLoading(true);
-        try {
-          const response = await fetch('/api/arxiv', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ topic: keywords.join(' '), maxResults: 10 }), // Use keywords here
-          });
-          const data = await response.json();
-          if (response.ok) {
-            console.log('ArXiv API Response:', data); // Log the response
-            setArxivData(data);
-          } else {
-            console.error('Failed to fetch data:', data.error);
-          }
-        } catch (error) {
-          console.error('Error:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchArxivData().then(() => {
-        
-      }); // Call the arXiv request function
-    }
-  }, [keywords]); // Trigger this effect when keywords change
-
 
   useEffect(() => {
     if (arxivData.length > 0) {
       const populateVector = async () => {
         setLoading(true);
         try {
-          const response = await fetch('/api/rag', {
-            method: 'POST',
+          const response = await fetch("/api/rag", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json',
+              "Content-Type": "application/json",
             },
             body: JSON.stringify({ messages: [topic], maxResults: 10 }), // Use keywords here
           });
           const data = await response.json();
           if (response.ok) {
-            console.log('ArXiv API Response:', data); // Log the response
+            console.log("ArXiv API Response:", data); // Log the response
             // set(data);
           } else {
-            console.error('Failed to fetch data:', data.error);
+            console.error("Failed to fetch data:", data.error);
           }
         } catch (error) {
-          console.error('Error:', error);
+          console.error("Error:", error);
         } finally {
           setLoading(false);
         }
@@ -170,7 +109,6 @@ const Home = () => {
       populateVector(); // Call the arXiv request function
     }
   }, [arxivData]); // Trigger this effect when keywords change
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -181,25 +119,44 @@ const Home = () => {
     setChatHistory(updatedChatHistory);
     setMessage("");
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        messages: updatedChatHistory,
-        lessonLength,
-        detailLevel,
-        includeQuiz,
-        keywords, // Include keywords in the request
-      }),
-    });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          messages: updatedChatHistory,
+          lessonLength,
+          detailLevel,
+          includeQuiz,
+          keywords,
+        }),
+      });
 
-    const data = await res.json();
-    setChatHistory([
-      ...updatedChatHistory,
-      { role: "assistant" as const, content: data.content },
-    ]);
+      const data = await res.json();
+
+      // Try to parse the content as a lesson plan
+      try {
+        const modules = parsePlan(data.content);
+        setChatHistory([
+          ...updatedChatHistory,
+          {
+            role: "assistant" as const,
+            content: data.content,
+            modules: modules,
+          },
+        ]);
+      } catch (error) {
+        // If parsing fails, just display the content as regular text
+        setChatHistory([
+          ...updatedChatHistory,
+          { role: "assistant" as const, content: data.content },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error in chat:", error);
+    }
   };
 
   const handleReset = () => {
@@ -247,39 +204,103 @@ const Home = () => {
                       type="text"
                       value={topic}
                       onChange={(e) => setTopic(e.target.value)}
-                      placeholder="Enter a topic (e.g., 'Python Programming', 'World War II')"
+                      placeholder="Enter a topic (e.g., 'Python Programming', 'AI Agents')"
                       className="px-3 py-2 bg-gray-700 bg-opacity-50 text-white rounded"
+                      disabled={loading}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full flex items-center justify-center"
+                    disabled={loading}
                   >
-                    Start Learning
+                    {loading ? (
+                      <>
+                        <svg
+                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Generating Lesson Plan...
+                      </>
+                    ) : (
+                      "Start Learning"
+                    )}
                   </button>
                 </form>
               ) : (
                 <>
                   {/* Chat History */}
                   <div className="h-96 overflow-y-auto mb-4">
-                    {chatHistory.map((msg, index) => (
-                      <div
-                        key={index}
-                        className={`flex ${
-                          msg.role === "user" ? "justify-end" : "justify-start"
-                        } mb-2`}
-                      >
-                        <div
-                          className={`max-w-[70%] p-3 rounded-lg ${
-                            msg.role === "user"
-                              ? "bg-blue-500 text-white"
-                              : "bg-gray-700 text-white"
-                          }`}
-                        >
-                          <p>{msg.content}</p>
+                    {loading ? (
+                      <div className="flex justify-center items-center h-full">
+                        <div className="flex flex-col items-center space-y-4">
+                          <svg
+                            className="animate-spin h-10 w-10 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          <p className="text-white">
+                            Generating your personalized lesson plan...
+                          </p>
                         </div>
                       </div>
-                    ))}
+                    ) : (
+                      chatHistory.map((msg, index) => (
+                        <div
+                          key={index}
+                          className={`flex ${
+                            msg.role === "user"
+                              ? "justify-end"
+                              : "justify-start"
+                          } mb-2`}
+                        >
+                          <div
+                            className={`max-w-[90%] p-3 rounded-lg ${
+                              msg.role === "user"
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-700 text-white"
+                            }`}
+                          >
+                            {msg.modules ? (
+                              <LessonPlan modules={msg.modules} />
+                            ) : (
+                              <p>{msg.content}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
 
                   {/* Input Form */}
@@ -295,52 +316,8 @@ const Home = () => {
                       className="px-3 py-2 bg-gray-700 bg-opacity-50 text-white rounded"
                     />
 
-                    {/* Lesson Length Slider */}
-                    <div className="flex flex-col space-y-2">
-                      <label className="text-gray-100">
-                        Lesson Length: {lessonLength} minutes
-                      </label>
-                      <input
-                        type="range"
-                        min="1"
-                        max="20"
-                        value={lessonLength}
-                        onChange={(e) =>
-                          setLessonLength(Number(e.target.value))
-                        }
-                        className="w-full"
-                      />
-                    </div>
-
-                    {/* Detail Level Radio Buttons */}
-                    <div className="flex flex-col space-y-2">
-                      <label className="text-gray-100">Detail Level:</label>
-                      <div className="flex space-x-4">
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            value="high"
-                            checked={detailLevel === "high"}
-                            onChange={() => setDetailLevel("high")}
-                            className="form-radio text-blue-500"
-                          />
-                          <span className="text-gray-100">High Level</span>
-                        </label>
-                        <label className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            value="detailed"
-                            checked={detailLevel === "detailed"}
-                            onChange={() => setDetailLevel("detailed")}
-                            className="form-radio text-blue-500"
-                          />
-                          <span className="text-gray-100">Detailed</span>
-                        </label>
-                      </div>
-                    </div>
-
                     {/* Include Quiz Checkbox */}
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
                         checked={includeQuiz}
@@ -350,7 +327,7 @@ const Home = () => {
                       <label className="text-gray-100">
                         Include Quiz at the End
                       </label>
-                    </div>
+                    </div> */}
 
                     {/* Buttons */}
                     <div className="flex space-x-4">
