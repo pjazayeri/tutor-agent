@@ -211,51 +211,46 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar /> {/* Use the Navbar component */}
+    <div className="min-h-screen flex flex-col bg-gray-900">
+      <Navbar />
       <main
-        className="flex-grow bg-cover bg-center grid grid-cols-1 md:grid-cols-2 py-6 sm:py-12"
-        style={{
-          backgroundImage: "url('/images/main.jpg')", // Path to your image file
-        }}
+        className={`flex-grow transition-all duration-500 ease-in-out ${
+          step === "topic" ? "flex items-center justify-center p-4" : "p-0"
+        }`}
       >
-        {/* Left Section for Large Text */}
-        <div className="flex items-center justify-center bg-gray-800 bg-opacity-0 p-10">
-          <h1
-            className="text-7xl font-extrabold text-white text-center"
-            style={{ textShadow: "2px 2px 10px rgba(0, 0, 0, 0.8)" }}
+        <div
+          className={`transition-all duration-500 ease-in-out ${
+            step === "topic"
+              ? "w-full max-w-lg transform scale-100"
+              : "w-full transform scale-100"
+          }`}
+        >
+          <div
+            className={`bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-all duration-500 ${
+              step === "topic"
+                ? "bg-opacity-80"
+                : "bg-opacity-100 rounded-none min-h-[calc(100vh-4rem)]"
+            }`}
           >
-            Tutor Agent
-          </h1>
-        </div>
-
-        {/* Right Section for Chat Box */}
-        <section className="flex items-center justify-center">
-          <div className="max-w-3xl mx-auto w-full">
-            {/* Chat Box */}
-            <div className="bg-gray-800 shadow-lg rounded px-8 pt-6 pb-8 mb-4 bg-opacity-80">
-              <h2 className="text-2xl font-bold text-center text-gray-100 mb-4">
-                GPT-4 Mini
-              </h2>
-
-              {step === "topic" ? (
-                <form onSubmit={handleTopicSubmit} className="space-y-4">
+            {step === "topic" ? (
+              <div className="px-8 pt-6 pb-8">
+                <h2 className="text-3xl font-bold text-center text-white mb-8">
+                  What would you like to learn?
+                </h2>
+                <form onSubmit={handleTopicSubmit} className="space-y-6">
                   <div className="flex flex-col space-y-2">
-                    <label className="text-gray-100">
-                      What would you like to learn about?
-                    </label>
                     <input
                       type="text"
                       value={topic}
                       onChange={(e) => setTopic(e.target.value)}
                       placeholder="Enter a topic (e.g., 'Python Programming', 'AI Agents')"
-                      className="px-3 py-2 bg-gray-700 bg-opacity-50 text-white rounded"
+                      className="px-4 py-3 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       disabled={loading}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded w-full flex items-center justify-center"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
                     disabled={loading}
                   >
                     {loading ? (
@@ -287,10 +282,41 @@ const Home = () => {
                     )}
                   </button>
                 </form>
-              ) : (
-                <>
-                  {/* Chat History */}
-                  <div className="h-96 overflow-y-auto mb-4">
+              </div>
+            ) : (
+              <div className="fixed inset-0 flex flex-col bg-gray-800">
+                {/* Chat Header */}
+                <div className="bg-gray-900 px-6 py-4 border-b border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-white">
+                      Learning: {topic}
+                    </h2>
+                    <button
+                      onClick={handleReset}
+                      className="text-gray-400 hover:text-white transition-colors duration-200"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-6 w-6"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Content Container with Fixed Height */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Scrollable Content Area */}
+                  <div className="flex-1 overflow-y-auto py-6 bg-gray-700">
                     {loading ? (
                       <div className="flex justify-center items-center h-full">
                         <div className="flex flex-col items-center space-y-4">
@@ -314,89 +340,66 @@ const Home = () => {
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          <p className="text-white">
+                          <p className="text-white text-lg">
                             Generating your personalized lesson plan...
                           </p>
                         </div>
                       </div>
                     ) : (
-                      chatHistory.map((msg, index) => (
-                        <div
-                          key={index}
-                          className={`flex ${
-                            msg.role === "user"
-                              ? "justify-end"
-                              : "justify-start"
-                          } mb-2`}
-                        >
+                      <div className="max-w-5xl mx-auto px-4">
+                        {chatHistory.map((msg, index) => (
                           <div
-                            className={`max-w-[90%] p-3 rounded-lg ${
+                            key={index}
+                            className={`${
                               msg.role === "user"
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-700 text-white"
+                                ? "ml-auto mb-4 max-w-[70%]"
+                                : "mx-auto mb-20"
                             }`}
                           >
-                            {msg.modules ? (
-                              <LessonPlan modules={msg.modules} />
-                            ) : (
-                              <p>{msg.content}</p>
-                            )}
+                            <div
+                              className={`${
+                                msg.role === "user" ? "bg-blue-600" : "w-full"
+                              } rounded-lg overflow-hidden`}
+                            >
+                              {msg.modules ? (
+                                <LessonPlan modules={msg.modules} />
+                              ) : (
+                                <p className="p-4 text-white">{msg.content}</p>
+                              )}
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        ))}
+                      </div>
                     )}
                   </div>
 
-                  {/* Input Form */}
-                  <form
-                    onSubmit={handleSubmit}
-                    className="flex flex-col space-y-4"
-                  >
-                    <input
-                      type="text"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Enter your message"
-                      className="px-3 py-2 bg-gray-700 bg-opacity-50 text-white rounded"
-                    />
-
-                    {/* Include Quiz Checkbox */}
-                    {/* <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
-                        checked={includeQuiz}
-                        onChange={(e) => setIncludeQuiz(e.target.checked)}
-                        className="form-checkbox text-blue-500"
-                      />
-                      <label className="text-gray-100">
-                        Include Quiz at the End
-                      </label>
-                    </div> */}
-
-                    {/* Buttons */}
-                    <div className="flex space-x-4">
-                      <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex-grow"
-                      >
-                        Send
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleReset}
-                        className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-                      >
-                        Reset
-                      </button>
-                    </div>
-                  </form>
-                </>
-              )}
-            </div>
+                  {/* Chat Input - Fixed at bottom with margin */}
+                  <div className="bg-gray-800 border-t border-gray-700 px-4 py-4 mt-auto">
+                    <form onSubmit={handleSubmit} className="max-w-5xl mx-auto">
+                      <div className="flex space-x-4">
+                        <input
+                          type="text"
+                          value={message}
+                          onChange={(e) => setMessage(e.target.value)}
+                          placeholder="Ask a question about the lesson..."
+                          className="flex-grow px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        />
+                        <button
+                          type="submit"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
+                        >
+                          Send
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </section>
+        </div>
       </main>
-      <Footer /> {/* Use the Footer component */}
+      <Footer />
     </div>
   );
 };
