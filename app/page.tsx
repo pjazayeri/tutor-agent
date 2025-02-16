@@ -44,36 +44,36 @@ const Home = () => {
         setKeywords(data.keywords);
         setStep("chat");
 
-        // Don't show keywords in chat, wait for RAG response
-        const response = await fetch("/api/rag", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ messages: [topic], maxResults: 10 }),
-        });
+        // // Don't show keywords in chat, wait for RAG response
+        // const response = await fetch("/api/rag", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //   },
+        //   body: JSON.stringify({ messages: [topic], maxResults: 10 }),
+        // });
 
-        const ragData = await response.json();
+        // const ragData = await response.json();
 
-        if (response.ok) {
-          try {
-            const modules = parsePlan(ragData.content);
-            setChatHistory([
-              {
-                role: "assistant",
-                content: ragData.content,
-                modules: modules,
-              },
-            ]);
-          } catch (error) {
-            setChatHistory([
-              {
-                role: "assistant",
-                content: ragData.content,
-              },
-            ]);
-          }
-        }
+        // if (response.ok) {
+        //   try {
+        //     const modules = parsePlan(ragData.content);
+        //     setChatHistory([
+        //       {
+        //         role: "assistant",
+        //         content: ragData.content,
+        //         modules: modules,
+        //       },
+        //     ]);
+        //   } catch (error) {
+        //     setChatHistory([
+        //       {
+        //         role: "assistant",
+        //         content: ragData.content,
+        //       },
+        //     ]);
+        //   }
+        // }
       }
     } catch (error) {
       console.error("Error:", error);
@@ -185,24 +185,24 @@ const Home = () => {
         throw new Error("No content in response");
       }
 
-      // Try to parse the content as a lesson plan
-      try {
-        const modules = parsePlan(data.content);
-        setChatHistory([
-          ...updatedChatHistory,
-          {
-            role: "assistant",
-            content: data.content,
-            modules: modules,
-          },
-        ]);
-      } catch (error) {
-        // If parsing fails, just display the content as regular text
-        setChatHistory([
-          ...updatedChatHistory,
-          { role: "assistant", content: data.content },
-        ]);
-      }
+      // // Try to parse the content as a lesson plan
+      // try {
+      //   const modules = parsePlan(data.content);
+      //   setChatHistory([
+      //     ...updatedChatHistory,
+      //     {
+      //       role: "assistant",
+      //       content: data.content,
+      //       modules: modules,
+      //     },
+      //   ]);
+      // } catch (error) {
+      // If parsing fails, just display the content as regular text
+      setChatHistory([
+        ...updatedChatHistory,
+        { role: "assistant", content: data.content },
+      ]);
+      // }
     } catch (error) {
       console.error("Error in chat:", error);
       // Optionally show error message to user
@@ -327,10 +327,10 @@ const Home = () => {
                   <div className="flex-1 overflow-y-auto py-6 bg-gray-700">
                     <div className="max-w-5xl mx-auto px-4">
                       {/* First show the lesson plan */}
-                      {chatHistory.length > 0 && chatHistory[0].modules && (
+                      {chunks && (
                         <div className="mx-auto mb-8">
                           <div className="w-full rounded-lg overflow-hidden">
-                            <LessonPlan modules={chatHistory[0].modules} />
+                            <LessonPlan modules={parsePlan(chunks)} />
                           </div>
                         </div>
                       )}
