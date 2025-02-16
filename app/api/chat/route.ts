@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { ChatOpenAI } from "@langchain/openai";
 
+
 const chatModel = new ChatOpenAI({
   apiKey: process.env.OPENAI_API_KEY, // Ensure your API key is set in the environment variables
   model: "gpt-4",
 });
+
 
 export async function POST(req: Request) {
   const { messages, lessonLength, detailLevel, includeQuiz } = await req.json();
@@ -21,6 +23,7 @@ export async function POST(req: Request) {
     role: "system",
     content: prompt,
   };
+
   const conversationMessages = [systemMessage, ...messages];
   const response = await chatModel.invoke(conversationMessages);
   return NextResponse.json({

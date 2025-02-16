@@ -18,6 +18,7 @@ const Home = () => {
   const [detailLevel, setDetailLevel] = useState<"high" | "detailed">("high"); // Default to high level
   const [includeQuiz, setIncludeQuiz] = useState(false); // Default to no quiz
   const [loading, setLoading] = useState(false);
+  const [arxivData, setArxivData] = useState([]);
 
   //
   // const handleTopicSubmit = async (e: React.FormEvent) => {
@@ -122,6 +123,7 @@ const Home = () => {
           const data = await response.json();
           if (response.ok) {
             console.log('ArXiv API Response:', data); // Log the response
+            setArxivData(data);
           } else {
             console.error('Failed to fetch data:', data.error);
           }
@@ -132,11 +134,42 @@ const Home = () => {
         }
       };
 
-      fetchArxivData(); // Call the arXiv request function
+      fetchArxivData().then(() => {
+        
+      }); // Call the arXiv request function
     }
   }, [keywords]); // Trigger this effect when keywords change
 
 
+  useEffect(() => {
+    if (arxivData.length > 0) {
+      const populateVector = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch('/api/rag', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ messages: [topic], maxResults: 10 }), // Use keywords here
+          });
+          const data = await response.json();
+          if (response.ok) {
+            console.log('ArXiv API Response:', data); // Log the response
+            // set(data);
+          } else {
+            console.error('Failed to fetch data:', data.error);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      populateVector(); // Call the arXiv request function
+    }
+  }, [arxivData]); // Trigger this effect when keywords change
 
 
   const handleSubmit = async (e: React.FormEvent) => {
