@@ -1,3 +1,15 @@
+## Tutor Agent
+
+An agent for generating lesson plans
+
+
+## Prerequirsits
+
+Node v20.18.0
+npm 10.8.2
+
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -5,6 +17,8 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
+npm i
+
 npm run dev
 # or
 yarn dev
