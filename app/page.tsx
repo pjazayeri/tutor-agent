@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LessonPlan from "./components/LessonPlan";
 import { parsePlan } from "./utils/planParser";
+import styles from "./styles/FloatingHearts.module.css";
 
 type ChatMessage = {
   role: "user" | "assistant";
@@ -228,13 +229,27 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-900">
-      <Navbar />
+    <div className="min-h-screen flex flex-col bg-[#ff6eb0]">
+      {step === "topic" && <Navbar />}
       <main
         className={`flex-grow transition-all duration-500 ease-in-out ${
           step === "topic" ? "flex items-center justify-center p-4" : "p-0"
-        }`}
+        } ${styles.heartBackground}`}
       >
+        {/* Add the floating hearts */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+          <div className={styles.heart}></div>
+        </div>
+
         <div
           className={`transition-all duration-500 ease-in-out ${
             step === "topic"
@@ -243,15 +258,15 @@ const Home = () => {
           }`}
         >
           <div
-            className={`bg-gray-800 shadow-lg rounded-lg overflow-hidden transition-all duration-500 ${
+            className={`bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-500 ${
               step === "topic"
-                ? "bg-opacity-80"
+                ? "bg-opacity-100"
                 : "bg-opacity-100 rounded-none min-h-[calc(100vh-4rem)]"
             }`}
           >
             {step === "topic" ? (
               <div className="px-8 pt-6 pb-8">
-                <h2 className="text-3xl font-bold text-center text-white mb-8">
+                <h2 className="text-3xl font-bold text-center text-black mb-8">
                   What would you like to learn?
                 </h2>
                 <form onSubmit={handleTopicSubmit} className="space-y-6">
@@ -261,13 +276,13 @@ const Home = () => {
                       value={topic}
                       onChange={(e) => setTopic(e.target.value)}
                       placeholder="Enter a topic (e.g., 'Python Programming', 'AI Agents')"
-                      className="px-4 py-3 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="px-4 py-3 bg-[#ff6eb0] text-white rounded-lg focus:ring-2 focus:ring-[#ff1493] focus:outline-none placeholder-white"
                       disabled={loading}
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
+                    className="w-full bg-[#FF0000] hover:bg-[#cc0000] text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center transition-colors duration-200"
                     disabled={loading}
                   >
                     {loading ? (
@@ -301,97 +316,121 @@ const Home = () => {
                 </form>
               </div>
             ) : (
-              <div className="fixed inset-0 flex flex-col bg-gray-800">
-                {/* Chat Header */}
-                <div className="bg-gray-900 px-6 py-4 border-b border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-white">
-                      Learning: {topic}
-                    </h2>
-                    <button
-                      onClick={handleReset}
-                      className="text-gray-400 hover:text-white transition-colors duration-200"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
-                  </div>
+              <div className="fixed inset-0 flex flex-col bg-[#ff6eb0] bg-opacity-90">
+                {/* Floating Hearts Background - Always visible */}
+                <div className="absolute inset-0 pointer-events-none">
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
+                  <div className={styles.heart}></div>
                 </div>
 
-                {/* Content Container with Fixed Height */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  {/* Scrollable Content Area */}
-                  <div className="flex-1 overflow-y-auto py-6 bg-gray-700">
-                    <div className="max-w-5xl mx-auto px-4">
-                      {/* First show the lesson plan */}
-                      {chunks && (
-                        <div className="mx-auto mb-8">
-                          <div className="w-full rounded-lg overflow-hidden">
-                            <LessonPlan modules={parsePlan(chunks)} />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Then show the chat messages */}
-                      {chatHistory.slice(1).map((msg, index) => (
-                        <div
-                          key={index}
-                          className={`${
-                            msg.role === "user"
-                              ? "ml-auto mb-4 max-w-[70%]"
-                              : "mr-auto mb-4 max-w-[70%]"
-                          }`}
+                {/* Main Content Container */}
+                <div className="relative z-10 flex flex-col h-[calc(100vh-4rem)]">
+                  {/* Chat Header */}
+                  <div className="flex-none bg-[#ff6eb0] bg-opacity-90 px-6 py-4 border-b border-[#FFFFFF]">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold text-white">
+                        Learning: {topic}
+                      </h2>
+                      <button
+                        onClick={handleReset}
+                        className="text-white hover:text-[#ff1493] transition-colors duration-200"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
                         >
-                          <div
-                            className={`${
-                              msg.role === "user"
-                                ? "bg-blue-600"
-                                : "bg-gray-800"
-                            } rounded-lg overflow-hidden`}
-                          >
-                            <p className="p-4 text-white">{msg.content}</p>
-                          </div>
-                        </div>
-                      ))}
-
-                      {/* Show thinking indicator when loading */}
-                      {loading && (
-                        <div className="mr-auto mb-4 max-w-[70%]">
-                          <div className="bg-gray-800 rounded-lg overflow-hidden">
-                            <div className="p-4 text-white flex items-center space-x-2">
-                              <span>Thinking</span>
-                              <span className="flex space-x-1">
-                                <span className="animate-bounce delay-100">
-                                  .
-                                </span>
-                                <span className="animate-bounce delay-200">
-                                  .
-                                </span>
-                                <span className="animate-bounce delay-300">
-                                  .
-                                </span>
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
 
-                  {/* Chat Input - Fixed at bottom with margin */}
-                  <div className="bg-gray-800 border-t border-gray-700 px-4 py-4 mt-auto">
+                  {/* Scrollable Content Area */}
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="py-6 bg-[#ff6eb0]">
+                      <div className="max-w-5xl mx-auto px-4">
+                        {/* First show the lesson plan */}
+                        {chunks && (
+                          <div className="mx-auto mb-8">
+                            <div className="w-full rounded-lg overflow-hidden">
+                              <LessonPlan modules={parsePlan(chunks)} />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Then show the chat messages */}
+                        {chatHistory.slice(1).map((msg, index) => (
+                          <div
+                            key={index}
+                            className={`${
+                              msg.role === "user"
+                                ? "ml-auto mb-4 max-w-[70%]"
+                                : "mr-auto mb-4 max-w-[70%]"
+                            }`}
+                          >
+                            <div
+                              className={`${
+                                msg.role === "user"
+                                  ? "bg-[#ff1493]"
+                                  : "bg-white"
+                              } rounded-lg overflow-hidden`}
+                            >
+                              <p
+                                className={`p-4 ${
+                                  msg.role === "user"
+                                    ? "text-white"
+                                    : "text-[#ff1493]"
+                                }`}
+                              >
+                                {msg.content}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Show thinking indicator when loading */}
+                        {loading && (
+                          <div className="mr-auto mb-4 max-w-[70%]">
+                            <div className="bg-white rounded-lg overflow-hidden">
+                              <div className="p-4 text-[#ff1493] flex items-center space-x-2">
+                                <span>Thinking</span>
+                                <span className="flex space-x-1">
+                                  <span className="animate-bounce delay-100">
+                                    .
+                                  </span>
+                                  <span className="animate-bounce delay-200">
+                                    .
+                                  </span>
+                                  <span className="animate-bounce delay-300">
+                                    .
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat Input - At bottom of container */}
+                  <div className="flex-none bg-[#ff6eb0] bg-opacity-90 border-t border-[#ffffff] p-4">
                     <form onSubmit={handleSubmit} className="max-w-5xl mx-auto">
                       <div className="flex space-x-4">
                         <input
@@ -399,12 +438,12 @@ const Home = () => {
                           value={message}
                           onChange={(e) => setMessage(e.target.value)}
                           placeholder="Ask a question about the lesson..."
-                          className="flex-grow px-4 py-2 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                          className="flex-grow px-4 py-2 bg-white text-[#ff1493] rounded-lg focus:ring-2 focus:ring-[#ff1493] focus:outline-none placeholder-[#ff6eb0]"
                           disabled={loading}
                         />
                         <button
                           type="submit"
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
+                          className="bg-[#ff1493] hover:bg-[#ff1493]/80 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200"
                           disabled={loading}
                         >
                           Send

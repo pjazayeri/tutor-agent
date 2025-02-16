@@ -1,0 +1,92 @@
+.heartBackground {
+  background-color: #ff6eb0;
+  position: relative;
+  overflow: hidden;
+}
+
+.heart {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: white;
+  transform: rotate(45deg);
+  animation: floatUp 6s linear infinite;
+  opacity: 0;
+}
+
+.heart::before,
+.heart::after {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+}
+
+.heart::before {
+  left: -10px;
+}
+
+.heart::after {
+  top: -10px;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: rotate(45deg) translateY(100vh);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: rotate(45deg) translateY(-20vh);
+    opacity: 0;
+  }
+}
+
+/* Create multiple hearts with different positions and delays */
+.heart:nth-child(1) {
+  left: 10%;
+  animation-delay: 0s;
+}
+.heart:nth-child(2) {
+  left: 25%;
+  animation-delay: 2s;
+}
+.heart:nth-child(3) {
+  left: 40%;
+  animation-delay: 4s;
+}
+.heart:nth-child(4) {
+  left: 55%;
+  animation-delay: 1s;
+}
+.heart:nth-child(5) {
+  left: 70%;
+  animation-delay: 3s;
+}
+.heart:nth-child(6) {
+  left: 85%;
+  animation-delay: 5s;
+}
+.heart:nth-child(7) {
+  left: 15%;
+  animation-delay: 6s;
+}
+.heart:nth-child(8) {
+  left: 30%;
+  animation-delay: 7s;
+}
+.heart:nth-child(9) {
+  left: 45%;
+  animation-delay: 8s;
+}
+.heart:nth-child(10) {
+  left: 60%;
+  animation-delay: 9s;
+}
