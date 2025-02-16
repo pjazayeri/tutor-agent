@@ -212,10 +212,19 @@ const Home = () => {
   };
 
   const handleReset = () => {
+    // Reset all state variables
     setChatHistory([]);
     setKeywords([]);
     setTopic("");
+    setMessage("");
     setStep("topic");
+    setLoading(false);
+    setArxivData([]);
+    setPdfLinks([]);
+    setChunks("");
+    setLessonLength(10);
+    setDetailLevel("high");
+    setIncludeQuiz(false);
   };
 
   return (
