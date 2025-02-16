@@ -8,6 +8,12 @@ An agent for generating lesson plans
 Node v20.18.0
 npm 10.8.2
 
+## Connect to OPEN AI KEY
+
+Add the following to your .bashrc or .zshrc
+```bash
+export OPENAI_API_KEY="insert your key here"
+```
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
