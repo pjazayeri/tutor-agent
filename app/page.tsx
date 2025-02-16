@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -17,36 +17,127 @@ const Home = () => {
   const [lessonLength, setLessonLength] = useState(10); // Default to 10 minutes
   const [detailLevel, setDetailLevel] = useState<"high" | "detailed">("high"); // Default to high level
   const [includeQuiz, setIncludeQuiz] = useState(false); // Default to no quiz
+  const [loading, setLoading] = useState(false);
 
-  const handleTopicSubmit = async (e: React.FormEvent) => {
+  //
+  // const handleTopicSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!topic.trim()) return;
+  //
+  //   try {
+  //     const res = await fetch("/api/keywords", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({ topic }),
+  //     });
+  //
+  //     const data = await res.json();
+  //     if (data.keywords) {
+  //       setKeywords(data.keywords);
+  //       setStep("chat");
+  //       // Initialize chat with the topic
+  //       setChatHistory([
+  //         {
+  //           role: "assistant",
+  //           content: `${data.keywords.join(", ")}`,
+  //         },
+  //       ]);
+  //
+  //       // Use keywords to send requests arxiv
+  //       try {
+  //         const response = await fetch('/api/arxiv', {
+  //           method: 'POST',
+  //           headers: {
+  //             'Content-Type': 'application/json',
+  //           },
+  //           body: JSON.stringify({ topic: keywords, maxResults: 10 }),
+  //         });
+  //         const data = await response.json();
+  //         if (response.ok) {
+  //           // setResults(data);
+  //           console.log(data);
+  //         } else {
+  //           console.error('Failed to fetch data:', data.error);
+  //         }
+  //       } catch (error) {
+  //         console.error('Error:', error);
+  //       } finally {
+  //         // setLoading(false);
+  //       }
+  //
+  //
+  //     }
+  //   } catch (error) {
+  //     console.error("Failed to generate keywords:", error);
+  //   }
+  // };
+
+
+  const handleTopicSubmit = async (e) => {
     e.preventDefault();
     if (!topic.trim()) return;
 
     try {
-      const res = await fetch("/api/keywords", {
-        method: "POST",
+      const res = await fetch('/api/keywords', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ topic }),
       });
 
       const data = await res.json();
       if (data.keywords) {
-        setKeywords(data.keywords);
-        setStep("chat");
+        setKeywords(data.keywords); // Update keywords state
+        setStep('chat');
+
         // Initialize chat with the topic
         setChatHistory([
           {
-            role: "assistant",
-            content: `${data.keywords.join(", ")}`,
+            role: 'assistant',
+            content: `${data.keywords.join(', ')}`,
           },
         ]);
       }
     } catch (error) {
-      console.error("Failed to generate keywords:", error);
+      console.error('Failed to generate keywords:', error);
     }
   };
+
+  // Use useEffect to trigger the arXiv request after keywords are updated
+  useEffect(() => {
+    if (keywords.length > 0) {
+      const fetchArxivData = async () => {
+        setLoading(true);
+        try {
+          const response = await fetch('/api/arxiv', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ topic: keywords.join(' '), maxResults: 10 }), // Use keywords here
+          });
+          const data = await response.json();
+          if (response.ok) {
+            console.log('ArXiv API Response:', data); // Log the response
+          } else {
+            console.error('Failed to fetch data:', data.error);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchArxivData(); // Call the arXiv request function
+    }
+  }, [keywords]); // Trigger this effect when keywords change
+
+
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
