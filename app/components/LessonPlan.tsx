@@ -17,7 +17,7 @@ const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
       isOpen ? "rotate-180" : ""
     }`}
     fill="none"
-    stroke="currentColor"
+    stroke="white"
     viewBox="0 0 24 24"
     xmlns="http://www.w3.org/2000/svg"
   >
@@ -43,12 +43,12 @@ const ModuleCard = ({ module }: { module: Module }) => {
   });
 
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
         className="w-full text-left"
       >
-        <div className="bg-blue-600 px-6 py-4 flex justify-between items-center cursor-pointer">
+        <div className="bg-[#ff1493] px-6 py-4 flex justify-between items-center cursor-pointer">
           <h3 className="text-xl font-bold text-white">{module.modulename}</h3>
           <ChevronIcon isOpen={isExpanded} />
         </div>
@@ -59,15 +59,17 @@ const ModuleCard = ({ module }: { module: Module }) => {
           isExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
         } overflow-hidden`}
       >
-        <div className="px-6 py-4 border-b border-gray-700">
-          <h4 className="text-lg font-semibold text-blue-400 mb-2">Overview</h4>
+        <div className="px-6 py-4 border-b border-[#ff6eb0]">
+          <h4 className="text-lg font-semibold text-[#ff1493] mb-2">
+            Overview
+          </h4>
           <ul className="space-y-2">
             {module.description.map((line, lineIndex) => (
               <li
                 key={lineIndex}
-                className="text-gray-300 flex items-start space-x-2"
+                className="text-[#ff6eb0] flex items-start space-x-2"
               >
-                <span className="text-blue-400 mt-1">•</span>
+                <span className="text-[#ff1493] mt-1">•</span>
                 <span>{line}</span>
               </li>
             ))}
@@ -75,11 +77,11 @@ const ModuleCard = ({ module }: { module: Module }) => {
         </div>
 
         {module.content && module.content.trim() && (
-          <div className="px-6 py-4 border-b border-gray-700">
-            <h4 className="text-lg font-semibold text-blue-400 mb-2">
+          <div className="px-6 py-4 border-b border-[#ff6eb0]">
+            <h4 className="text-lg font-semibold text-[#ff1493] mb-2">
               Content
             </h4>
-            <div className="text-gray-300 prose prose-invert">
+            <div className="text-[#ff6eb0] prose prose-invert">
               {module.content
                 .split("\n")
                 .filter((para) => para.trim())
@@ -94,10 +96,10 @@ const ModuleCard = ({ module }: { module: Module }) => {
 
         {module.practice && module.practice.trim() && (
           <div className="px-6 py-4">
-            <h4 className="text-lg font-semibold text-blue-400 mb-2">
+            <h4 className="text-lg font-semibold text-[#ff1493] mb-2">
               Practice
             </h4>
-            <div className="text-gray-300 prose prose-invert">
+            <div className="text-[#ff6eb0] prose prose-invert">
               {module.practice
                 .split("\n")
                 .filter((para) => para.trim())
