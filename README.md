@@ -2,7 +2,7 @@
 
 An agent for generating lesson plans
 
-![Uploading Screenshot 2025-06-22 at 11.44.39 PM.png…]()
+<img width="1265" alt="Screenshot 2025-06-22 at 11 44 39 PM" src="https://github.com/user-attachments/assets/36bd9311-dad0-41fe-82e5-e0df93a9809c" />
 
 ## Prerequirsits
 
