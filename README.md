@@ -2,6 +2,7 @@
 
 An agent for generating lesson plans
 
+![Uploading Screenshot 2025-06-22 at 11.44.39 PM.png…]()
 
 ## Prerequirsits
 
